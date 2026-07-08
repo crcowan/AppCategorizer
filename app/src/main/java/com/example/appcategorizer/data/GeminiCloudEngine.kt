@@ -10,11 +10,10 @@ class GeminiCloudEngine(private val repository: CategoryRepository) : Categoriza
             ?: throw IllegalStateException("Gemini API Key is not set")
             
         val model = GenerativeModel(
-            modelName = "gemini-1.5-flash",
+            modelName = "gemini-1.5-flash-latest",
             apiKey = apiKey,
             generationConfig = generationConfig {
                 temperature = 0.1f
-                responseMimeType = "application/json"
             }
         )
 
