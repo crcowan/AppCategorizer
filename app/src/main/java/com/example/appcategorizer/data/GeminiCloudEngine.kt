@@ -14,6 +14,7 @@ class GeminiCloudEngine(private val repository: CategoryRepository) : Categoriza
             apiKey = apiKey,
             generationConfig = generationConfig {
                 temperature = 0.1f
+                responseMimeType = "application/json"
             }
         )
 
@@ -34,13 +35,15 @@ class GeminiCloudEngine(private val repository: CategoryRepository) : Categoriza
             1. You MUST categorize EVERY SINGLE ONE of the ${apps.size} package names listed above.
             2. You MUST use ONLY the following exact categories:
 $categoryListString
-            3. You MUST output your response as a simple list of "PACKAGE_NAME=CATEGORY".
-            4. Do NOT output JSON. Do NOT include quotes. Do NOT add any conversational text.
+            3. You MUST output your response as a valid JSON array of objects.
+            4. Each object must have a "package" key (the package name) and a "category" key (the assigned category).
             
-            Example of EXPECTED output format:
-            com.facebook.katana=Social Media
-            com.spotify.music=Music Players
-            org.telegram.messenger=Messaging & SMS
+            Example of EXPECTED JSON output:
+            [
+                {"package": "com.facebook.katana", "category": "Social Media"},
+                {"package": "com.spotify.music", "category": "Music Players"},
+                {"package": "org.telegram.messenger", "category": "Messaging & SMS"}
+            ]
         """.trimIndent()
 
         val response = model.generateContent(prompt)

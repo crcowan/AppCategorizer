@@ -5,17 +5,13 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.appcategorizer.data.CategoryRepository
 import com.example.appcategorizer.data.CategoryTaxonomyEntity
-import com.example.appcategorizer.data.DownloadState
-import com.example.appcategorizer.data.ModelDownloader
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
     private val repo = CategoryRepository(application)
-    private val downloader = ModelDownloader(application)
 
     private val _taxonomy = MutableStateFlow<List<CategoryTaxonomyEntity>>(emptyList())
     val taxonomy: StateFlow<List<CategoryTaxonomyEntity>> = _taxonomy.asStateFlow()
@@ -23,14 +19,14 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     private val _geminiApiKey = MutableStateFlow("")
     val geminiApiKey: StateFlow<String> = _geminiApiKey.asStateFlow()
 
-    private val _enginePreference = MutableStateFlow("Auto")
+    private val _openAIApiKey = MutableStateFlow("")
+    val openAIApiKey: StateFlow<String> = _openAIApiKey.asStateFlow()
+
+    private val _claudeApiKey = MutableStateFlow("")
+    val claudeApiKey: StateFlow<String> = _claudeApiKey.asStateFlow()
+
+    private val _enginePreference = MutableStateFlow("Gemini") // Default to Gemini
     val enginePreference: StateFlow<String> = _enginePreference.asStateFlow()
-
-    private val _downloadState = MutableStateFlow<DownloadState>(DownloadState.Idle)
-    val downloadState: StateFlow<DownloadState> = _downloadState.asStateFlow()
-
-    private val _isModelDownloaded = MutableStateFlow(false)
-    val isModelDownloaded: StateFlow<Boolean> = _isModelDownloaded.asStateFlow()
 
     init {
         loadSettings()
@@ -40,8 +36,17 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         viewModelScope.launch {
             _taxonomy.value = repo.getTaxonomy()
             _geminiApiKey.value = repo.getGeminiApiKey() ?: ""
-            _enginePreference.value = repo.getEnginePreference()
-            _isModelDownloaded.value = downloader.isModelDownloaded()
+            _openAIApiKey.value = repo.getOpenAIApiKey() ?: ""
+            _claudeApiKey.value = repo.getClaudeApiKey() ?: ""
+            
+            val pref = repo.getEnginePreference()
+            // Migrate legacy preferences to Gemini
+            if (pref == "Auto" || pref == "Local Only" || pref == "Cloud Only") {
+                _enginePreference.value = "Gemini"
+                repo.setEnginePreference("Gemini")
+            } else {
+                _enginePreference.value = pref
+            }
         }
     }
 
@@ -72,27 +77,24 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
+    fun setOpenAIApiKey(key: String) {
+        viewModelScope.launch {
+            repo.setOpenAIApiKey(key)
+            _openAIApiKey.value = key
+        }
+    }
+
+    fun setClaudeApiKey(key: String) {
+        viewModelScope.launch {
+            repo.setClaudeApiKey(key)
+            _claudeApiKey.value = key
+        }
+    }
+
     fun setEnginePreference(pref: String) {
         viewModelScope.launch {
             repo.setEnginePreference(pref)
             _enginePreference.value = pref
         }
-    }
-
-    fun importModelFromUri(uri: android.net.Uri, context: android.content.Context) {
-        viewModelScope.launch {
-            downloader.importModelFromUri(uri, context).collectLatest { state ->
-                _downloadState.value = state
-                if (state is DownloadState.Finished) {
-                    _isModelDownloaded.value = true
-                }
-            }
-        }
-    }
-    
-    fun deleteModel() {
-        downloader.deleteModel()
-        _isModelDownloaded.value = false
-        _downloadState.value = DownloadState.Idle
     }
 }

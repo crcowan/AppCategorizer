@@ -7,19 +7,21 @@ import com.example.appcategorizer.data.AppDatabase
 import com.example.appcategorizer.data.AppInfo
 import com.example.appcategorizer.data.DefaultAppRepository
 import com.example.appcategorizer.data.CategorizationEngine
-import com.example.appcategorizer.data.MediaPipeEngine
 import com.example.appcategorizer.data.GeminiCloudEngine
+import com.example.appcategorizer.data.OpenAICloudEngine
+import com.example.appcategorizer.data.ClaudeCloudEngine
 import com.example.appcategorizer.data.PlayStoreService
 import com.example.appcategorizer.data.CategoryRepository
 import com.example.appcategorizer.data.CategoryTaxonomyEntity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import android.widget.Toast
+import org.json.JSONArray
+import org.json.JSONObject
 
 class MainScreenViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -39,8 +41,9 @@ class MainScreenViewModel(application: Application) : AndroidViewModel(applicati
     private val playStoreService = PlayStoreService(database.appDao())
     private val categoryRepo = CategoryRepository(application)
 
-    private val mediaPipeEngine = MediaPipeEngine(application)
     private val geminiEngine = GeminiCloudEngine(categoryRepo)
+    private val openAIEngine = OpenAICloudEngine(categoryRepo)
+    private val claudeEngine = ClaudeCloudEngine(categoryRepo)
 
     init {
         viewModelScope.launch {
@@ -128,7 +131,7 @@ class MainScreenViewModel(application: Application) : AndroidViewModel(applicati
         val engine = determineEngine()
         
         if (engine == null) {
-            _uiState.value = MainScreenUiState.Error(Exception("No AI Engine available. Please download the local model or configure the Gemini Cloud fallback in Settings."))
+            _uiState.value = MainScreenUiState.Error(Exception("No AI Engine available. Please configure an API Key in Settings."))
             return
         }
 
@@ -136,11 +139,11 @@ class MainScreenViewModel(application: Application) : AndroidViewModel(applicati
             Toast.makeText(getApplication(), "Using Engine: ${engine.getEngineName()}", Toast.LENGTH_SHORT).show()
         }
 
-        val batches = enrichedApps.chunked(10) // 10 is optimal for the on-device model's context window
+        val batches = enrichedApps.chunked(30) // Increased batch size since cloud models have huge context limits
         for ((index, batch) in batches.withIndex()) {
             _uiState.value = MainScreenUiState.Loading("AI Categorizing... (Batch ${index + 1} of ${batches.size})\nEngine: ${engine.getEngineName()}")
             try {
-                // Perform generation on IO thread since MediaPipe blocks
+                // Perform generation on IO thread
                 val responseString = withContext(Dispatchers.IO) {
                     engine.categorizeBatch(batch, customCategories)
                 }
@@ -174,18 +177,9 @@ class MainScreenViewModel(application: Application) : AndroidViewModel(applicati
     private suspend fun determineEngine(): CategorizationEngine? {
         val pref = categoryRepo.getEnginePreference()
         return when (pref) {
-            "Local Only" -> if (mediaPipeEngine.isAvailable()) mediaPipeEngine else null
-            "Cloud Only" -> if (geminiEngine.isAvailable()) geminiEngine else null
-            else -> {
-                // Auto
-                if (mediaPipeEngine.isAvailable()) {
-                    mediaPipeEngine
-                } else if (geminiEngine.isAvailable()) {
-                    geminiEngine
-                } else {
-                    null
-                }
-            }
+            "OpenAI" -> if (openAIEngine.isAvailable()) openAIEngine else null
+            "Claude" -> if (claudeEngine.isAvailable()) claudeEngine else null
+            else -> if (geminiEngine.isAvailable()) geminiEngine else null
         }
     }
 
@@ -230,15 +224,16 @@ class MainScreenViewModel(application: Application) : AndroidViewModel(applicati
         android.util.Log.d("AppCategorizer", "RAW LLM RESPONSE:\n$responseString")
         
         try {
-            val lines = responseString.lines()
-            for (line in lines) {
-                if (!line.contains("=")) continue
+            // Some models might wrap the JSON in markdown blocks like ```json ... ```
+            val cleanedResponse = responseString.replace(Regex("```json\\n?|```"), "").trim()
+            val jsonArray = JSONArray(cleanedResponse)
+            
+            for (i in 0 until jsonArray.length()) {
+                val item = jsonArray.optJSONObject(i) ?: continue
+                val rawPkg = item.optString("package")
+                val rawCategory = item.optString("category")
                 
-                val parts = line.split("=", limit = 2)
-                if (parts.size != 2) continue
-                
-                val rawPkg = parts[0].trim()
-                val rawCategory = parts[1].trim()
+                if (rawPkg.isBlank() || rawCategory.isBlank()) continue
                 
                 // Deduplicate
                 if (seenPackages.contains(rawPkg)) continue
@@ -263,7 +258,7 @@ class MainScreenViewModel(application: Application) : AndroidViewModel(applicati
             }
             
         } catch (e: Exception) {
-            e.printStackTrace()
+            android.util.Log.e("AppCategorizer", "Failed to parse JSON response: $responseString", e)
         }
         return result
     }

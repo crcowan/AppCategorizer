@@ -97,8 +97,11 @@ dependencies {
   implementation(libs.jsoup)
 
   // On-Device LLM (MediaPipe)
-  implementation(libs.mediapipe.tasks.genai)
+
   
   // Cloud Fallback (Gemini API)
   implementation(libs.google.ai.client.generativeai)
+  
+  // Cloud APIs (OpenAI / Claude)
+  implementation(libs.okhttp)
 }

@@ -18,14 +18,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.ui.platform.LocalContext
-import android.content.Intent
-import android.net.Uri
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
-import com.example.appcategorizer.data.DownloadState
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,16 +29,9 @@ fun SettingsScreen(
 ) {
     val taxonomy by viewModel.taxonomy.collectAsState()
     val geminiApiKey by viewModel.geminiApiKey.collectAsState()
+    val openAIApiKey by viewModel.openAIApiKey.collectAsState()
+    val claudeApiKey by viewModel.claudeApiKey.collectAsState()
     val enginePreference by viewModel.enginePreference.collectAsState()
-    val downloadState by viewModel.downloadState.collectAsState()
-    val isModelDownloaded by viewModel.isModelDownloaded.collectAsState()
-    val context = LocalContext.current
-
-    val modelImportLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
-        if (uri != null) {
-            viewModel.importModelFromUri(uri, context)
-        }
-    }
 
     var showDialog by remember { mutableStateOf(false) }
     var editingCategory by remember { mutableStateOf<com.example.appcategorizer.data.CategoryTaxonomyEntity?>(null) }
@@ -138,7 +125,7 @@ fun SettingsScreen(
 
             // Engine Preference Dropdown
             var expanded by remember { mutableStateOf(false) }
-            val options = listOf("Auto", "Local Only", "Cloud Only")
+            val options = listOf("Gemini", "OpenAI", "Claude")
             
             ExposedDropdownMenuBox(
                 expanded = expanded,
@@ -150,7 +137,7 @@ fun SettingsScreen(
                     readOnly = true,
                     value = enginePreference,
                     onValueChange = { },
-                    label = { Text("Categorization Engine") },
+                    label = { Text("Cloud Provider") },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                     colors = ExposedDropdownMenuDefaults.textFieldColors()
                 )
@@ -171,58 +158,29 @@ fun SettingsScreen(
             }
 
             // Gemini API Key Input
-            OutlinedTextField(
-                value = geminiApiKey,
-                onValueChange = { viewModel.setGeminiApiKey(it) },
-                label = { Text("Gemini API Key (Optional)") },
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
-            )
-
-            // Local Model Import UI
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text("Local Gemma 2B Model", fontWeight = FontWeight.SemiBold)
-                    Text(
-                        if (isModelDownloaded) "Imported (~1.5GB)" else "Not Imported", 
-                        style = MaterialTheme.typography.bodySmall,
-                        color = if (isModelDownloaded) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
-                    )
-                    if (!isModelDownloaded) {
-                        Text(
-                            "Download from Kaggle/HF and import the .bin file.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-                
-                when (val state = downloadState) {
-                    is DownloadState.Downloading -> {
-                        CircularProgressIndicator(progress = { state.progress / 100f })
-                    }
-                    else -> {
-                        if (!isModelDownloaded) {
-                            Button(onClick = { modelImportLauncher.launch(arrayOf("*/*")) }) {
-                                Text("Import")
-                            }
-                        } else {
-                            TextButton(onClick = { viewModel.deleteModel() }) {
-                                Text("Delete", color = MaterialTheme.colorScheme.error)
-                            }
-                        }
-                    }
-                }
-            }
-            if (downloadState is DownloadState.Error) {
-                Text(
-                    text = "Error: ${(downloadState as DownloadState.Error).message}",
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.padding(horizontal = 16.dp)
+            if (enginePreference == "Gemini") {
+                OutlinedTextField(
+                    value = geminiApiKey,
+                    onValueChange = { viewModel.setGeminiApiKey(it) },
+                    label = { Text("Gemini API Key") },
+                    visualTransformation = PasswordVisualTransformation(),
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
+                )
+            } else if (enginePreference == "OpenAI") {
+                OutlinedTextField(
+                    value = openAIApiKey,
+                    onValueChange = { viewModel.setOpenAIApiKey(it) },
+                    label = { Text("OpenAI API Key") },
+                    visualTransformation = PasswordVisualTransformation(),
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
+                )
+            } else if (enginePreference == "Claude") {
+                OutlinedTextField(
+                    value = claudeApiKey,
+                    onValueChange = { viewModel.setClaudeApiKey(it) },
+                    label = { Text("Claude API Key") },
+                    visualTransformation = PasswordVisualTransformation(),
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
                 )
             }
 

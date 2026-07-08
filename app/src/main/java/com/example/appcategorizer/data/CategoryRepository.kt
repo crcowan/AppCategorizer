@@ -112,6 +112,22 @@ class CategoryRepository(application: Application) {
         appDao.insertSetting(SettingsEntity("GEMINI_API_KEY", key))
     }
 
+    suspend fun getOpenAIApiKey(): String? = withContext(Dispatchers.IO) {
+        appDao.getSetting("OPENAI_API_KEY")
+    }
+
+    suspend fun setOpenAIApiKey(key: String) = withContext(Dispatchers.IO) {
+        appDao.insertSetting(SettingsEntity("OPENAI_API_KEY", key))
+    }
+
+    suspend fun getClaudeApiKey(): String? = withContext(Dispatchers.IO) {
+        appDao.getSetting("CLAUDE_API_KEY")
+    }
+
+    suspend fun setClaudeApiKey(key: String) = withContext(Dispatchers.IO) {
+        appDao.insertSetting(SettingsEntity("CLAUDE_API_KEY", key))
+    }
+
     suspend fun getEnginePreference(): String = withContext(Dispatchers.IO) {
         appDao.getSetting("ENGINE_PREFERENCE") ?: "Auto"
     }
