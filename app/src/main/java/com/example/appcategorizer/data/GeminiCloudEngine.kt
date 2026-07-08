@@ -65,14 +65,15 @@ $categoryListString
             })
         }
 
-        val url = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=$apiKey"
-
-        val request = Request.Builder()
-            .url(url)
-            .post(requestBody.toString().toRequestBody("application/json".toMediaType()))
-            .build()
-
         return withContext(Dispatchers.IO) {
+            val modelName = getBestAvailableModel(apiKey)
+            val url = "https://generativelanguage.googleapis.com/v1/$modelName:generateContent?key=$apiKey"
+
+            val request = Request.Builder()
+                .url(url)
+                .post(requestBody.toString().toRequestBody("application/json".toMediaType()))
+                .build()
+
             client.newCall(request).execute().use { response ->
                 val body = response.body?.string() ?: ""
                 if (!response.isSuccessful) {
@@ -122,6 +123,64 @@ $categoryListString
     }
 
     override fun getEngineName(): String {
-        return "Gemini 1.5 Flash (Cloud API)"
+        return "Gemini (Cloud API Auto-Select)"
+    }
+    
+    companion object {
+        private var cachedModelName: String? = null
+        
+        private val PREFERRED_MODELS = listOf(
+            "models/gemini-2.5-flash",
+            "models/gemini-2.0-flash",
+            "models/gemini-1.5-pro",
+            "models/gemini-1.5-flash",
+            "models/gemini-1.0-pro",
+            "models/gemini-pro"
+        )
+    }
+    
+    private fun getBestAvailableModel(apiKey: String): String {
+        cachedModelName?.let { return it }
+
+        try {
+            val modelsRequest = Request.Builder()
+                .url("https://generativelanguage.googleapis.com/v1/models?key=$apiKey")
+                .get()
+                .build()
+            client.newCall(modelsRequest).execute().use { modelsResponse ->
+                val modelsBody = modelsResponse.body?.string() ?: ""
+                if (modelsResponse.isSuccessful) {
+                    val modelsJson = JSONObject(modelsBody)
+                    val modelsArray = modelsJson.optJSONArray("models")
+                    val availableModels = mutableListOf<String>()
+                    if (modelsArray != null) {
+                        for (i in 0 until modelsArray.length()) {
+                            availableModels.add(modelsArray.getJSONObject(i).optString("name"))
+                        }
+                    }
+                    
+                    for (preferred in PREFERRED_MODELS) {
+                        if (availableModels.contains(preferred)) {
+                            cachedModelName = preferred
+                            return preferred
+                        }
+                    }
+                    
+                    // If no preferred models match, try to find any model with "flash" or "pro"
+                    val fallback = availableModels.firstOrNull { it.contains("flash") || it.contains("pro") }
+                    if (fallback != null) {
+                        cachedModelName = fallback
+                        return fallback
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            // Ignore error and fall through to default
+        }
+        
+        // Final fallback if network fetch fails
+        val defaultModel = "models/gemini-1.5-flash"
+        cachedModelName = defaultModel
+        return defaultModel
     }
 }
