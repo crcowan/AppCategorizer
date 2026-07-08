@@ -76,6 +76,27 @@ $categoryListString
             client.newCall(request).execute().use { response ->
                 val body = response.body?.string() ?: ""
                 if (!response.isSuccessful) {
+                    try {
+                        val modelsRequest = Request.Builder()
+                            .url("https://generativelanguage.googleapis.com/v1beta/models?key=$apiKey")
+                            .get()
+                            .build()
+                        val modelsResponse = client.newCall(modelsRequest).execute()
+                        val modelsBody = modelsResponse.body?.string() ?: ""
+                        if (modelsResponse.isSuccessful) {
+                            val modelsJson = JSONObject(modelsBody)
+                            val modelsArray = modelsJson.optJSONArray("models")
+                            val modelNames = mutableListOf<String>()
+                            if (modelsArray != null) {
+                                for (i in 0 until modelsArray.length()) {
+                                    modelNames.add(modelsArray.getJSONObject(i).optString("name"))
+                                }
+                            }
+                            throw Exception("Gemini HTTP Error ${response.code}: $body\n\nAVAILABLE MODELS FOR THIS API KEY:\n${modelNames.joinToString("\n")}")
+                        }
+                    } catch (e: Exception) {
+                        // ignore and throw original if fetching models fails
+                    }
                     throw Exception("Gemini HTTP Error ${response.code}: $body")
                 }
                 
