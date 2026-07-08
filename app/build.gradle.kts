@@ -98,10 +98,6 @@ dependencies {
 
   // On-Device LLM (MediaPipe)
 
-  
-  // Cloud Fallback (Gemini API)
-  implementation(libs.google.ai.client.generativeai)
-  
-  // Cloud APIs (OpenAI / Claude)
+  // Cloud APIs (OpenAI / Claude / Gemini)
   implementation(libs.okhttp)
 }
