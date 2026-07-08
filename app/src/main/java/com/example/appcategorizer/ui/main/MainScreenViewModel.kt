@@ -224,9 +224,47 @@ class MainScreenViewModel(application: Application) : AndroidViewModel(applicati
         android.util.Log.d("AppCategorizer", "RAW LLM RESPONSE:\n$responseString")
         
         try {
-            // Some models might wrap the JSON in markdown blocks like ```json ... ```
+            // Remove markdown blocks if present
             val cleanedResponse = responseString.replace(Regex("```json\\n?|```"), "").trim()
-            val jsonArray = JSONArray(cleanedResponse)
+            
+            var jsonArray: JSONArray? = null
+            
+            fun tryParse(text: String): JSONArray? {
+                try {
+                    return JSONArray(text)
+                } catch (e: Exception) {
+                    try {
+                        val jsonObj = JSONObject(text)
+                        val keys = jsonObj.keys()
+                        while (keys.hasNext()) {
+                            val key = keys.next()
+                            val possibleArray = jsonObj.optJSONArray(key)
+                            if (possibleArray != null) {
+                                return possibleArray
+                            }
+                        }
+                    } catch (e2: Exception) {
+                        // ignore
+                    }
+                }
+                return null
+            }
+
+            jsonArray = tryParse(cleanedResponse)
+            
+            if (jsonArray == null) {
+                // Try to extract a JSON block using regex if there is conversational text
+                val jsonRegex = Regex("\\[.*\\]|\\{.*\\}", RegexOption.DOT_MATCHES_ALL)
+                val match = jsonRegex.find(cleanedResponse)
+                if (match != null) {
+                    jsonArray = tryParse(match.value)
+                }
+            }
+            
+            if (jsonArray == null) {
+                android.util.Log.e("AppCategorizer", "No JSON Array found in response: $cleanedResponse")
+                return result
+            }
             
             for (i in 0 until jsonArray.length()) {
                 val item = jsonArray.optJSONObject(i) ?: continue
