@@ -62,11 +62,10 @@ $categoryListString
             })
             put("generationConfig", JSONObject().apply {
                 put("temperature", 0.1)
-                put("responseMimeType", "application/json")
             })
         }
 
-        val url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=$apiKey"
+        val url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=$apiKey"
 
         val request = Request.Builder()
             .url(url)
@@ -102,6 +101,6 @@ $categoryListString
     }
 
     override fun getEngineName(): String {
-        return "Gemini 1.5 Flash (Cloud API)"
+        return "Gemini Pro (Cloud API)"
     }
 }
