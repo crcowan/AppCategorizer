@@ -159,6 +159,18 @@ class MainScreenViewModel(application: Application) : AndroidViewModel(applicati
                 }
             } catch (e: Exception) {
                 android.util.Log.e("AppCategorizer", "Error during categorization of batch $index", e)
+                val errorMsg = e.message ?: ""
+                if (errorMsg.contains("429") || errorMsg.contains("RESOURCE_EXHAUSTED") || errorMsg.contains("quota")) {
+                    val userFriendlyMessage = if (errorMsg.contains("prepayment credits are depleted")) {
+                        "API Error: Your prepayment credits are depleted. You must add funds to your billing account to continue using this engine."
+                    } else {
+                        "API Error: Rate limit exceeded. Free tier quotas typically reset at midnight Pacific Time, or every minute depending on the limit hit."
+                    }
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(getApplication(), userFriendlyMessage, Toast.LENGTH_LONG).show()
+                    }
+                    break // Abort remaining batches to avoid spamming the API
+                }
             }
         }
         
