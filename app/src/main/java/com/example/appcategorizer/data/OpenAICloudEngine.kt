@@ -23,16 +23,21 @@ class OpenAICloudEngine(private val repository: CategoryRepository) : Categoriza
         val apiKey = repository.getOpenAIApiKey()
             ?: throw IllegalStateException("OpenAI API Key is not set")
             
-        val appListString = apps.joinToString(separator = "\n") { app ->
-            val desc = app.playStoreCategory ?: "No description provided"
-            "- ${app.packageName} (${app.name}) : $desc"
+        val appListJsonArray = JSONArray()
+        for (app in apps) {
+            appListJsonArray.put(JSONObject().apply {
+                put("package", app.packageName)
+                put("name", app.name)
+                put("description", app.playStoreCategory ?: "No description provided")
+            })
         }
+        val appListString = appListJsonArray.toString(2)
 
         val categoryListString = customCategories.joinToString(separator = "\n") { "               - \"$it\"" }
 
         val prompt = """
-            You are a strict categorization AI.
-            Here is a list of ${apps.size} installed apps in the format "PACKAGE_NAME (APP_NAME) : DESCRIPTION":
+            You are an expert app categorizer.
+            Here is a JSON array of ${apps.size} installed apps to categorize:
             
             $appListString
             
@@ -40,18 +45,22 @@ class OpenAICloudEngine(private val repository: CategoryRepository) : Categoriza
             1. You MUST categorize EVERY SINGLE ONE of the ${apps.size} package names listed above.
             2. You MUST use ONLY the following exact categories:
 $categoryListString
-            3. You MUST output your response as a valid JSON array of objects.
-            4. Each object must have a "package" key (the package name) and a "category" key (the assigned category).
+            3. If an app does not perfectly fit into any category, you MUST select the closest conceptual match. DO NOT omit any apps. Your output array MUST contain exactly ${apps.size} items.
+            4. You MUST output your response as a valid JSON array of objects.
+            5. Each object must have a "package" key (the exact package name) and a "category" key (the assigned category).
             
             Example of EXPECTED JSON output:
             [
                 {"package": "com.facebook.katana", "category": "Social Media"},
-                {"package": "com.spotify.music", "category": "Music Players"}
+                {"package": "com.spotify.music", "category": "Music Players"},
+                {"package": "org.telegram.messenger", "category": "Messaging & SMS"}
             ]
         """.trimIndent()
 
         val jsonBody = JSONObject().apply {
             put("model", "gpt-4o-mini")
+            put("temperature", 0.2)
+            put("response_format", JSONObject().apply { put("type", "json_object") })
             put("messages", JSONArray().apply {
                 put(JSONObject().apply {
                     put("role", "system")

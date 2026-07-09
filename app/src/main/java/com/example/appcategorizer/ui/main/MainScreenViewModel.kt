@@ -172,6 +172,11 @@ class MainScreenViewModel(application: Application) : AndroidViewModel(applicati
                     break // Abort remaining batches to avoid spamming the API
                 }
             }
+            
+            if (index < batches.size - 1) {
+                _uiState.value = MainScreenUiState.Loading("Waiting for API rate limit... (4.5s)")
+                kotlinx.coroutines.delay(4500L)
+            }
         }
         
         // Handle apps that the AI completely dropped

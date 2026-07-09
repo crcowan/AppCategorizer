@@ -22,16 +22,21 @@ class GeminiCloudEngine(private val repository: CategoryRepository) : Categoriza
         val apiKey = repository.getGeminiApiKey()
         if (apiKey.isNullOrBlank()) throw IllegalStateException("Gemini API Key is not set")
 
-        val appListString = apps.joinToString(separator = "\n") { app ->
-            val desc = app.playStoreCategory ?: "No description provided"
-            "- ${app.packageName} (${app.name}) : $desc"
+        val appListJsonArray = JSONArray()
+        for (app in apps) {
+            appListJsonArray.put(JSONObject().apply {
+                put("package", app.packageName)
+                put("name", app.name)
+                put("description", app.playStoreCategory ?: "No description provided")
+            })
         }
+        val appListString = appListJsonArray.toString(2)
 
         val categoryListString = customCategories.joinToString(separator = "\n") { "               - \"$it\"" }
 
         val promptText = """
-            You are a strict categorization AI.
-            Here is a list of ${apps.size} installed apps in the format "PACKAGE_NAME (APP_NAME) : DESCRIPTION":
+            You are an expert app categorizer.
+            Here is a JSON array of ${apps.size} installed apps to categorize:
             
             $appListString
             
@@ -39,8 +44,9 @@ class GeminiCloudEngine(private val repository: CategoryRepository) : Categoriza
             1. You MUST categorize EVERY SINGLE ONE of the ${apps.size} package names listed above.
             2. You MUST use ONLY the following exact categories:
 $categoryListString
-            3. You MUST output your response as a valid JSON array of objects.
-            4. Each object must have a "package" key (the package name) and a "category" key (the assigned category).
+            3. If an app does not perfectly fit into any category, you MUST select the closest conceptual match. DO NOT omit any apps. Your output array MUST contain exactly ${apps.size} items.
+            4. You MUST output your response as a valid JSON array of objects.
+            5. Each object must have a "package" key (the exact package name) and a "category" key (the assigned category).
             
             Example of EXPECTED JSON output:
             [
@@ -61,7 +67,7 @@ $categoryListString
                 })
             })
             put("generationConfig", JSONObject().apply {
-                put("temperature", 0.1)
+                put("temperature", 0.2)
             })
         }
 
