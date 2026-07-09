@@ -2,6 +2,7 @@ package com.example.appcategorizer.data
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import android.util.Log
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -73,7 +74,7 @@ $categoryListString
 
         return withContext(Dispatchers.IO) {
             val modelName = getBestAvailableModel(apiKey)
-            val url = "https://generativelanguage.googleapis.com/v1/$modelName:generateContent?key=$apiKey"
+            val url = "https://generativelanguage.googleapis.com/v1beta/$modelName:generateContent?key=$apiKey"
 
             val request = Request.Builder()
                 .url(url)
@@ -129,19 +130,32 @@ $categoryListString
     }
 
     override fun getEngineName(): String {
-        return "Gemini (Cloud API Auto-Select)"
+        return cachedModelName ?: "Gemini (Cloud API Auto-Select)"
     }
     
     companion object {
         private var cachedModelName: String? = null
+        private val blacklistedModels = mutableSetOf<String>()
+        var lastAvailableModels: List<String> = emptyList()
+            private set
+        
+        fun blacklistModel(modelName: String) {
+            blacklistedModels.add(modelName)
+            if (cachedModelName == modelName) {
+                cachedModelName = null
+            }
+        }
         
         private val PREFERRED_MODELS = listOf(
-            "models/gemini-2.5-flash",
+            // We prioritize the most stable and generous models. 
+            // -flash-latest typically maps to the current stable version of Flash, which has massive batch quotas.
+            // -flash-lite-latest is an incredibly fast, highly generous model for simple tasks like classification.
+            "models/gemini-flash-latest",
+            "models/gemini-flash-lite-latest",
+            "models/gemini-3.5-flash", // Leave 3.5 as fallback if the others are missing
+            "models/gemini-2.0-flash-lite",
             "models/gemini-2.0-flash",
-            "models/gemini-1.5-pro",
-            "models/gemini-1.5-flash",
-            "models/gemini-1.0-pro",
-            "models/gemini-pro"
+            "models/gemini-2.5-pro"
         )
     }
     
@@ -150,7 +164,7 @@ $categoryListString
 
         try {
             val modelsRequest = Request.Builder()
-                .url("https://generativelanguage.googleapis.com/v1/models?key=$apiKey")
+                .url("https://generativelanguage.googleapis.com/v1beta/models?key=$apiKey")
                 .get()
                 .build()
             client.newCall(modelsRequest).execute().use { modelsResponse ->
@@ -165,15 +179,25 @@ $categoryListString
                         }
                     }
                     
+                    lastAvailableModels = availableModels.toList()
+                    
+                    // Log the available models so we can see what Google actually provides
+                    Log.d("AppCategorizer", "AVAILABLE MODELS FROM GOOGLE: $availableModels")
+                    
                     for (preferred in PREFERRED_MODELS) {
-                        if (availableModels.contains(preferred)) {
-                            cachedModelName = preferred
-                            return preferred
+                        val match = availableModels.firstOrNull { 
+                            it.startsWith(preferred) && !blacklistedModels.contains(it)
+                        }
+                        if (match != null) {
+                            cachedModelName = match
+                            return match
                         }
                     }
                     
                     // If no preferred models match, try to find any model with "flash" or "pro"
-                    val fallback = availableModels.firstOrNull { it.contains("flash") || it.contains("pro") }
+                    val fallback = availableModels.firstOrNull { 
+                        (it.contains("flash") || it.contains("pro")) && !blacklistedModels.contains(it) 
+                    }
                     if (fallback != null) {
                         cachedModelName = fallback
                         return fallback
@@ -185,7 +209,7 @@ $categoryListString
         }
         
         // Final fallback if network fetch fails
-        val defaultModel = "models/gemini-1.5-flash"
+        val defaultModel = "models/gemini-1.5-pro" // Try 1.5-pro as fallback since flash is missing
         cachedModelName = defaultModel
         return defaultModel
     }

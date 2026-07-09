@@ -37,6 +37,9 @@ interface AppDao {
     @Query("UPDATE app_metadata SET aiCategory = NULL")
     suspend fun clearAllAppCategories()
 
+    @Query("DELETE FROM app_metadata")
+    suspend fun clearAllMetadata()
+
     @Query("SELECT value FROM app_settings WHERE `key` = :key")
     suspend fun getSetting(key: String): String?
 

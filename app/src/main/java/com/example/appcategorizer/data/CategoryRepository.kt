@@ -12,7 +12,12 @@ class CategoryRepository(application: Application) {
     suspend fun getTaxonomy(): List<CategoryTaxonomyEntity> = withContext(Dispatchers.IO) {
         val existing = appDao.getAllTaxonomy()
         if (existing.isNotEmpty()) {
-            return@withContext existing
+            // Check if it's an outdated taxonomy missing the newer categories
+            if (existing.none { it.categoryName == "Developer Tools" }) {
+                appDao.clearTaxonomy() // wipe and re-seed
+            } else {
+                return@withContext existing
+            }
         }
 
         // Seed with defaults
@@ -31,6 +36,7 @@ class CategoryRepository(application: Application) {
             CategoryTaxonomyEntity("Camera", "Media"),
             // Information
             CategoryTaxonomyEntity("News & Magazines", "Information"),
+            CategoryTaxonomyEntity("Social News & Forums", "Information"),
             CategoryTaxonomyEntity("Sports", "Information"),
             CategoryTaxonomyEntity("Weather", "Information"),
             // Daily Life

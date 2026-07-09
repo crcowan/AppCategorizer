@@ -126,9 +126,10 @@ class MainScreenViewModel(application: Application) : AndroidViewModel(applicati
 
         val taxonomy = categoryRepo.getTaxonomy()
         val customCategories = taxonomy.map { it.categoryName }
+        android.util.Log.d("AppCategorizer", "LOADED TAXONOMY: $customCategories")
 
         val seenPackages = mutableSetOf<String>()
-        val engine = determineEngine()
+        var engine = determineEngine()
         
         if (engine == null) {
             _uiState.value = MainScreenUiState.Error(Exception("No AI Engine available. Please configure an API Key in Settings."))
@@ -136,40 +137,116 @@ class MainScreenViewModel(application: Application) : AndroidViewModel(applicati
         }
 
         withContext(Dispatchers.Main) {
-            Toast.makeText(getApplication(), "Using Engine: ${engine.getEngineName()}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(getApplication(), "Using Engine: ${engine!!.getEngineName()}", Toast.LENGTH_SHORT).show()
         }
 
         val batches = enrichedApps.chunked(30) // Increased batch size since cloud models have huge context limits
         for ((index, batch) in batches.withIndex()) {
-            _uiState.value = MainScreenUiState.Loading("AI Categorizing... (Batch ${index + 1} of ${batches.size})\nEngine: ${engine.getEngineName()}")
-            try {
-                // Perform generation on IO thread
-                val responseString = withContext(Dispatchers.IO) {
-                    engine.categorizeBatch(batch, customCategories)
-                }
-                val batchMap = parseLlmResponse(responseString, batch, customCategories, seenPackages)
-                
-                // Save to DB
-                batchMap.forEach { (category, appsInCategory) ->
-                    for (app in appsInCategory) {
-                        app.llmCategory = category
-                        database.appDao().updateAppCategory(app.packageName, category)
-                        alreadyCategorized.add(app)
+            var retryCount = 0
+            var rateLimitRetries = 0
+            var success = false
+            
+            while (!success && retryCount < 10) {
+                val availableModels = if (engine is com.example.appcategorizer.data.GeminiCloudEngine) com.example.appcategorizer.data.GeminiCloudEngine.lastAvailableModels else emptyList()
+                _uiState.value = MainScreenUiState.Loading(
+                    message = "AI Categorizing... (Batch ${index + 1} of ${batches.size})${if (retryCount > 0) "\nRetrying..." else ""}",
+                    currentModel = engine!!.getEngineName(),
+                    availableModels = availableModels
+                )
+                try {
+                    // Perform generation on IO thread
+                    val responseString = withContext(Dispatchers.IO) {
+                        engine!!.categorizeBatch(batch, customCategories)
                     }
-                }
-            } catch (e: Exception) {
-                android.util.Log.e("AppCategorizer", "Error during categorization of batch $index", e)
-                val errorMsg = e.message ?: ""
-                if (errorMsg.contains("429") || errorMsg.contains("RESOURCE_EXHAUSTED") || errorMsg.contains("quota")) {
-                    val userFriendlyMessage = if (errorMsg.contains("prepayment credits are depleted")) {
-                        "API Error: Your prepayment credits are depleted. You must add funds to your billing account to continue using this engine."
+                    val batchMap = parseLlmResponse(responseString, batch, customCategories, seenPackages)
+                    
+                    // Save to DB
+                    batchMap.forEach { (category, appsInCategory) ->
+                        for (app in appsInCategory) {
+                            app.llmCategory = category
+                            database.appDao().updateAppCategory(app.packageName, category)
+                            alreadyCategorized.add(app)
+                        }
+                    }
+                    success = true
+                } catch (e: Exception) {
+                    android.util.Log.e("AppCategorizer", "Error during categorization of batch $index, retry: $retryCount", e)
+                    val errorMsg = e.message ?: ""
+                    if (errorMsg.contains("429") || errorMsg.contains("RESOURCE_EXHAUSTED") || errorMsg.contains("quota")) {
+                        if (errorMsg.contains("prepayment credits are depleted")) {
+                            val msg = "API Error: Your prepayment credits are depleted."
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(getApplication(), msg, Toast.LENGTH_LONG).show()
+                            }
+                            _uiState.value = MainScreenUiState.Error(Exception(msg))
+                            return // Abort completely, retrying won't help
+                        }
+                        
+                        if (rateLimitRetries == 0) {
+                            rateLimitRetries++
+                            retryCount++
+                            val delayMsg = "Rate limit hit. Waiting 60s for quota reset..."
+                            val availableModels = if (engine is com.example.appcategorizer.data.GeminiCloudEngine) com.example.appcategorizer.data.GeminiCloudEngine.lastAvailableModels else emptyList()
+                            _uiState.value = MainScreenUiState.Loading(
+                                message = delayMsg,
+                                currentModel = engine!!.getEngineName(),
+                                availableModels = availableModels
+                            )
+                            kotlinx.coroutines.delay(62000L) // Wait slightly over a minute to clear RPM limits
+                            continue
+                        } else {
+                            // The model is still rate limited (likely a daily limit). Blacklist it and failover!
+                            if (engine is com.example.appcategorizer.data.GeminiCloudEngine) {
+                                com.example.appcategorizer.data.GeminiCloudEngine.blacklistModel(engine!!.getEngineName())
+                            }
+                            engine = determineEngine()
+                            if (engine == null) {
+                                val msg = "API Error: All available models are currently overloaded or rate-limited."
+                                _uiState.value = MainScreenUiState.Error(Exception(msg))
+                                return // Abort remaining batches
+                            }
+                            
+                            retryCount++
+                            rateLimitRetries = 0 // Reset for the new model
+                            val availableModels = if (engine is com.example.appcategorizer.data.GeminiCloudEngine) com.example.appcategorizer.data.GeminiCloudEngine.lastAvailableModels else emptyList()
+                            _uiState.value = MainScreenUiState.Loading(
+                                message = "Rate limit hit again. Failing over to ${engine!!.getEngineName()}...",
+                                currentModel = engine!!.getEngineName(),
+                                availableModels = availableModels
+                            )
+                            kotlinx.coroutines.delay(2000L) // Brief pause before retry
+                            continue
+                        }
+                    } else if (errorMsg.contains("503") || errorMsg.contains("UNAVAILABLE") || errorMsg.contains("high demand")) {
+                        // The model is overloaded. Blacklist it and failover to the next best model!
+                        if (engine is com.example.appcategorizer.data.GeminiCloudEngine) {
+                            com.example.appcategorizer.data.GeminiCloudEngine.blacklistModel(engine!!.getEngineName())
+                        }
+                        engine = determineEngine()
+                        if (engine == null) {
+                            val msg = "API Error: All available models are currently overloaded or failing."
+                            _uiState.value = MainScreenUiState.Error(Exception(msg))
+                            return // Abort remaining batches
+                        }
+                        
+                        retryCount++
+                        val availableModels = if (engine is com.example.appcategorizer.data.GeminiCloudEngine) com.example.appcategorizer.data.GeminiCloudEngine.lastAvailableModels else emptyList()
+                        _uiState.value = MainScreenUiState.Loading(
+                            message = "Model overloaded. Failing over...",
+                            currentModel = engine!!.getEngineName(),
+                            availableModels = availableModels
+                        )
+                        kotlinx.coroutines.delay(2000L) // Brief pause before retry
+                        continue
                     } else {
-                        "API Error: Rate limit exceeded. Free tier quotas typically reset at midnight Pacific Time, or every minute depending on the limit hit."
+                        // Non-rate limit error, don't retry
+                        val msg = "API Error: $errorMsg"
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(getApplication(), msg, Toast.LENGTH_LONG).show()
+                        }
+                        _uiState.value = MainScreenUiState.Error(Exception(msg))
+                        return // Abort remaining batches
                     }
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(getApplication(), userFriendlyMessage, Toast.LENGTH_LONG).show()
-                    }
-                    break // Abort remaining batches to avoid spamming the API
                 }
             }
             
@@ -182,7 +259,9 @@ class MainScreenViewModel(application: Application) : AndroidViewModel(applicati
         // Handle apps that the AI completely dropped
         val categorizedPackages = alreadyCategorized.map { it.packageName }.toSet()
         val completelyDropped = uncategorizedApps.filter { !categorizedPackages.contains(it.packageName) }
+        android.util.Log.d("AppCategorizer", "COMPLETELY DROPPED APPS COUNT: ${completelyDropped.size}")
         for (app in completelyDropped) {
+            android.util.Log.w("AppCategorizer", "FORCED TO MISC: ${app.packageName} - ${app.name}")
             app.llmCategory = "Misc"
             database.appDao().updateAppCategory(app.packageName, "Misc")
             alreadyCategorized.add(app)
@@ -298,6 +377,9 @@ class MainScreenViewModel(application: Application) : AndroidViewModel(applicati
                 
                 if (matchedApp != null) {
                     val finalCategory = matchCategoryFuzzy(rawCategory, customCategories)
+                    if (finalCategory == "Misc") {
+                        android.util.Log.w("AppCategorizer", "LLM CLASSIFIED AS MISC: ${matchedApp.packageName} -> raw category was '$rawCategory'")
+                    }
                     result.getOrPut(finalCategory) { mutableListOf() }.add(matchedApp)
                     seenPackages.add(matchedApp.packageName)
                     android.util.Log.d("AppCategorizer", "Matched: ${matchedApp.packageName} -> $finalCategory (from $rawCategory)")
@@ -320,7 +402,11 @@ class MainScreenViewModel(application: Application) : AndroidViewModel(applicati
 }
 
 sealed interface MainScreenUiState {
-    data class Loading(val message: String) : MainScreenUiState
+    data class Loading(
+        val message: String,
+        val currentModel: String? = null,
+        val availableModels: List<String> = emptyList()
+    ) : MainScreenUiState
     data class Error(val throwable: Throwable) : MainScreenUiState
     data class Success(val apps: List<AppInfo>, val taxonomy: List<CategoryTaxonomyEntity>) : MainScreenUiState
 }
