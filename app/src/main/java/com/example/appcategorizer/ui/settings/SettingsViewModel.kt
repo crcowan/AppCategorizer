@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.appcategorizer.data.CategoryRepository
+import com.example.appcategorizer.data.SettingsEntity
 import com.example.appcategorizer.data.CategoryTaxonomyEntity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,6 +19,14 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     private val _geminiApiKey = MutableStateFlow("")
     val geminiApiKey: StateFlow<String> = _geminiApiKey.asStateFlow()
+
+    // Theme preference (System, Light, Dark)
+    private val _themePreference = MutableStateFlow("System")
+    val themePreference: StateFlow<String> = _themePreference.asStateFlow()
+
+    // Zoom level (Small, Medium, Large)
+    private val _zoomLevel = MutableStateFlow("Medium")
+    val zoomLevel: StateFlow<String> = _zoomLevel.asStateFlow()
 
     private val _openAIApiKey = MutableStateFlow("")
     val openAIApiKey: StateFlow<String> = _openAIApiKey.asStateFlow()
@@ -47,6 +56,10 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             } else {
                 _enginePreference.value = pref
             }
+
+            // Load theme and zoom preferences (default values already set)
+            _themePreference.value = repo.getThemePreference()
+            _zoomLevel.value = repo.getZoomLevel()
         }
     }
 
@@ -95,6 +108,33 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         viewModelScope.launch {
             repo.setEnginePreference(pref)
             _enginePreference.value = pref
+        }
+    }
+
+    fun setThemePreference(pref: String) {
+        viewModelScope.launch {
+            repo.setThemePreference(pref)
+            _themePreference.value = pref
+        }
+    }
+
+    fun setZoomLevel(level: String) {
+        viewModelScope.launch {
+            repo.setZoomLevel(level)
+            _zoomLevel.value = level
+        }
+    }
+
+
+    fun forceRecategorize() {
+        viewModelScope.launch {
+            kotlinx.coroutines.Dispatchers.IO.let { ioDispatcher ->
+                kotlinx.coroutines.withContext(ioDispatcher) {
+                    com.example.appcategorizer.data.AppDatabase.getDatabase(getApplication()).appDao().clearAllAppCategories()
+                }
+            }
+            val workRequest = androidx.work.OneTimeWorkRequestBuilder<com.example.appcategorizer.worker.CategorizationWorker>().build()
+            androidx.work.WorkManager.getInstance(getApplication()).enqueueUniqueWork("CategorizationWork", androidx.work.ExistingWorkPolicy.REPLACE, workRequest)
         }
     }
 }

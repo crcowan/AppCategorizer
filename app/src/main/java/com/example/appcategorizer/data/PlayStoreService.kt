@@ -47,10 +47,18 @@ class PlayStoreService(private val appDao: AppDao) {
                 }
             }
 
+            // The full description is often inside a div with data-g-id="description"
+            var fullDescription: String? = null
+            val descElement = document.select("div[data-g-id=description]").first()
+            if (descElement != null) {
+                fullDescription = descElement.text()
+            }
+
             val metadata = AppMetadataEntity(
                 packageName = packageName,
                 playStoreCategory = category,
                 shortDescription = shortDescription,
+                fullDescription = fullDescription,
                 reviewSnippet = null, // Parsing reviews requires complex JS rendering in modern Play Store
                 lastUpdated = System.currentTimeMillis()
             )
@@ -60,15 +68,18 @@ class PlayStoreService(private val appDao: AppDao) {
             return@withContext metadata
         } catch (e: Exception) {
             Log.e("PlayStoreService", "Failed to fetch metadata for $packageName: ${e.message}")
-            // Return a stub so we don't keep failing repeatedly in memory, but DO NOT save to DB
-            // so that it can be retried in future app sessions.
-            return@withContext AppMetadataEntity(
+            // Save the stub so we have a row in the DB to attach the AI category to later,
+            // and so we don't infinitely retry scraping unlisted apps on every launch.
+            val stub = AppMetadataEntity(
                 packageName = packageName,
                 playStoreCategory = null,
                 shortDescription = null,
+                fullDescription = null,
                 reviewSnippet = null,
                 lastUpdated = System.currentTimeMillis()
             )
+            appDao.insertMetadata(stub)
+            return@withContext stub
         }
     }
 }

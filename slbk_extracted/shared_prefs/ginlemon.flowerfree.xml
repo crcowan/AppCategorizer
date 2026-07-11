@@ -1,0 +1,250 @@
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<map>
+    <string name="panelDisposition">10=0;20=4;40=2;100=1;</string>
+    <boolean name="sideScrollerVisibility" value="false" />
+    <long name="crashTime" value="1741364444718" />
+    <boolean name="drwLegacySearch" value="true" />
+    <boolean name="ShowLabels" value="true" />
+    <int name="blurRadius" value="125" />
+    <long name="key_last_leveling" value="1783451293536" />
+    <boolean name="ENABLE_NEW_PREF_MENU" value="true" />
+    <boolean name="evrLaunchedAsDflt" value="true" />
+    <boolean name="isWallpaperSavedOnDisk" value="true" />
+    <string name="drawerIconAppearanceKey">prAd:true;path:M0 512 C0 286 2 192 85 99 C168 7 271 0 512 0 C752 0 855 7 938 99 C1022 192 1024 286 1024 512 C1024 737 1022 832 938 924 C855 1016 752 1024 512 1024 C271 1024 168 1016 85 924 C2 832 0 737 0 512Z;icPk:ginlemon.iconpackstudio;thMd:false;thFl:false;chUI:false;</string>
+    <boolean name="isBrAvail" value="true" />
+    <int name="ClockFormat" value="1" />
+    <int name="LastDensity" value="420" />
+    <boolean name="wallpaperViaScreenshot" value="false" />
+    <boolean name="dateBackground" value="false" />
+    <boolean name="WizardComplete" value="true" />
+    <int name="iconSize" value="64" />
+    <int name="widgetColorAccent" value="-8427280" />
+    <boolean name="needRating" value="false" />
+    <int name="weather_last_condition" value="2" />
+    <int name="DrawerAnimation" value="11" />
+    <boolean name="hddppssrcrs" value="true" />
+    <int name="SystemFont" value="5977" />
+    <boolean name="enableCategory" value="true" />
+    <string name="last_position">38.7895199;-77.0707578;fused;1783618773864</string>
+    <boolean name="notificationCount" value="true" />
+    <int name="homeLabelSize" value="120" />
+    <string name="intentWeatherAction">{&#10;  &quot;type&quot;: &quot;serializable&quot;,&#10;  &quot;serializableAction&quot;: {&#10;    &quot;type&quot;: &quot;ginlemon.flower.models.SerializableAction.LaunchAppAction&quot;,&#10;    &quot;packageName&quot;: &quot;com.google.android.apps.weather&quot;,&#10;    &quot;label&quot;: &quot;Weather&quot;,&#10;    &quot;activityName&quot;: &quot;com.google.android.apps.weather.home.HomeActivity&quot;,&#10;    &quot;userId&quot;: 0&#10;  }&#10;}</string>
+    <boolean name="supportsWizardMode" value="false" />
+    <long name="AcceptedTermsDate" value="1606507196413" />
+    <boolean name="enableGestures" value="true" />
+    <int name="datemargintop" value="0" />
+    <int name="IcnGrdAlign" value="2" />
+    <boolean name="searchPanelPSSuggest" value="true" />
+    <boolean name="showDoubleTapIcons" value="true" />
+    <boolean name="blurEffect" value="true" />
+    <int name="weather_last_temperature" value="31" />
+    <string name="wallpaperPalette">{&quot;dominantColor&quot;:-7827336,&quot;darkVibrantColor&quot;:-15192008,&quot;mutedColor&quot;:-7827336,&quot;darkMutedColor&quot;:-9930664,&quot;lightMutedColor&quot;:-6774640,&quot;readabilityScore&quot;:89,&quot;averageLuminance&quot;:23,&quot;topAverageColor&quot;:-12239308,&quot;bottomAverageColor&quot;:-9469061,&quot;isBlurAvailable&quot;:true,&quot;wallpaperId&quot;:6653}</string>
+    <set name="hs_app_in_pending_to_be_added">
+        <string>com.stratumauth.app:0</string>
+        <string>com.roku.remote:0</string>
+        <string>com.giantfood.mobile.droid:0</string>
+        <string>com.mobisystems.office:0</string>
+        <string>com.luckydroid.droidbase:0</string>
+        <string>com.inkwired.droidinfo:0</string>
+        <string>com.dictionary:0</string>
+        <string>com.metromonitor.dc:0</string>
+        <string>com.daylightclock.android.license:0</string>
+        <string>app.morphe.android.youtube:0</string>
+        <string>com.kuma.notificationwidget:0</string>
+        <string>com.flightaware.android.liveFlightTracker:0</string>
+        <string>com.ifixit.ifixitmobile:0</string>
+        <string>ginlemon.iconpackstudio.exported:0</string>
+        <string>org.freepoc.wearbatterymonitor:0</string>
+        <string>ginlemon.iconpackstudio.exporter:0</string>
+        <string>com.usps.id45833:0</string>
+        <string>com.tplink.tether:0</string>
+        <string>app.morphe.android.apps.youtube.music:0</string>
+        <string>app.morphe.manager:0</string>
+        <string>org.peakfinder.area.alps:0</string>
+        <string>com.chase.sig.android:0</string>
+        <string>moe.shizuku.privileged.api:0</string>
+        <string>com.ustwogames.mv3:0</string>
+        <string>com.ext.ui:0</string>
+        <string>com.kieronquinn.app.smartspacer.plugin.aftership:0</string>
+        <string>com.kieronquinn.app.smartspacer.plugins.battery:0</string>
+        <string>com.fiveguys.olo.android:0</string>
+        <string>com.geminiman.wearosmanager:0</string>
+        <string>com.lilstiffy.mockgps:0</string>
+        <string>com.digibites.accubattery:0</string>
+        <string>fr.thema.wear.watch.complication.phone:0</string>
+        <string>com.ycngmn.nobook:0</string>
+        <string>com.samsung.wearable.watch7plugin:0</string>
+        <string>ru.execbit.aiostore:0</string>
+        <string>com.abdurazaaqmohammed.AntiSplit:0</string>
+        <string>com.twofasapp:0</string>
+        <string>com.looker.droidify:0</string>
+        <string>com.discord:0</string>
+        <string>rk.android.app.pixelsearch:0</string>
+        <string>com.incorporateapps.fakegps_route:0</string>
+        <string>com.wakdev.nfctools.pro:0</string>
+        <string>com.sec.android.easyMover:0</string>
+        <string>softmaker.applications.office.textmaker:0</string>
+        <string>com.arlosoft.macrodroid:0</string>
+        <string>com.watchfacestudio.ballozi.magnar.watchface:0</string>
+        <string>softmaker.applications.office.planmaker:0</string>
+        <string>com.round_tower.app.android.wallpaper.cartogram:0</string>
+        <string>com.emclient.mailclient:0</string>
+        <string>com.google.android.apps.labs.language.tailwind:0</string>
+        <string>com.anod.appwatcher:0</string>
+        <string>com.videotropic.skyhalo2:0</string>
+        <string>lunosoftware.sportsalerts:0</string>
+        <string>com.spotify.music:0</string>
+        <string>com.panasonic.avc.cng.imageapp:0</string>
+        <string>rk.android.app.shortcutmaker:0</string>
+        <string>com.waymap.app.waymap:0</string>
+        <string>com.lively.app:0</string>
+        <string>com.maxmpz.equalizer:0</string>
+        <string>com.google.android.safetycore:0</string>
+        <string>com.termux:0</string>
+        <string>com.joaomgcd.adbcommandcenter:0</string>
+        <string>at.vucak.impostor:0</string>
+        <string>idm.internet.download.manager.plus:0</string>
+        <string>nodomain.pacjo.smartspacer.plugin.localbattery:0</string>
+        <string>com.google.android.apps.bard:0</string>
+        <string>mobi.lockdown.weather:0</string>
+        <string>com.a0soft.gphone.app2sd:0</string>
+        <string>com.pittvandewitt.wavelet:0</string>
+        <string>org.kustom.widget.pro:0</string>
+        <string>com.maxelus.livewallpaper.shadowgalaxy:0</string>
+        <string>com.widex.tinnitus:0</string>
+        <string>com.gsamlabs.bbm.pro:0</string>
+        <string>com.wegmans.wegmansapp:0</string>
+        <string>com.cbnco.idsys.digid.virginia.mdl:0</string>
+        <string>com.samsung.android.shealthmonitors:0</string>
+        <string>com.arlosoft.macrodroid.connectivityhelper:0</string>
+        <string>com.facebook.katana:0</string>
+        <string>ginlemon.iconpackstudio:0</string>
+        <string>com.dev404.dbviewer:0</string>
+        <string>com.wholefoods.wholefoodsmarket:0</string>
+        <string>com.xodo.pdf.reader:0</string>
+        <string>net.gsantner.markor:0</string>
+        <string>com.legendsayantan.adbtools:0</string>
+        <string>com.radiant.bluetooth.pairing.app.auto.connect:0</string>
+    </set>
+    <boolean name="stackFromBottom" value="false" />
+    <string name="stacktrace">java.lang.IllegalStateException: This shouldn't happen, since we can always add a page to create more space&#10;&#9;at da4.z(SourceFile:265)&#10;&#9;at k94.invokeSuspend(SourceFile:17)&#10;&#9;at yg0.resumeWith(SourceFile:9)&#10;&#9;at kotlinx.coroutines.DispatchedTask.run(SourceFile:110)&#10;&#9;at android.os.Handler.handleCallback(Handler.java:991)&#10;&#9;at android.os.Handler.dispatchMessage(Handler.java:102)&#10;&#9;at android.os.Looper.loopOnce(Looper.java:232)&#10;&#9;at android.os.Looper.loop(Looper.java:317)&#10;&#9;at android.app.ActivityThread.main(ActivityThread.java:8934)&#10;&#9;at java.lang.reflect.Method.invoke(Native Method)&#10;&#9;at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:591)&#10;&#9;at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:911)&#10;&#9;Suppressed: kotlinx.coroutines.internal.DiagnosticCoroutineContextException: [StandaloneCoroutine{Cancelling}@248e669, Dispatchers.Main.immediate]&#10;    </string>
+    <string name="pref_latest_music_player_package_name">com.maxmpz.audioplayer</string>
+    <int name="quickStartColumns" value="5" />
+    <int name="LastSLVersion" value="2709" />
+    <boolean name="newspanelOnboardDone2" value="true" />
+    <boolean name="iconsLabel" value="true" />
+    <boolean name="dockHomeVisibility" value="true" />
+    <boolean name="HideMusicPlayerWhenUnused" value="true" />
+    <string name="homeIconAppearanceKey">prAd:true;path:M0 512 C0 286 2 192 85 99 C168 7 271 0 512 0 C752 0 855 7 938 99 C1022 192 1024 286 1024 512 C1024 737 1022 832 938 924 C855 1016 752 1024 512 1024 C271 1024 168 1016 85 924 C2 832 0 737 0 512Z;icPk:ginlemon.iconpackstudio;thMd:false;thFl:false;chUI:false;</string>
+    <boolean name="PreventChanges" value="false" />
+    <boolean name="playStoreReferrer" value="true" />
+    <string name="pkginst">com.android.vending</string>
+    <long name="rss_last_update_time" value="1783609401436" />
+    <int name="BubbleSize" value="81" />
+    <int name="GridSize" value="5" />
+    <int name="savedWallpaperId" value="6653" />
+    <int name="drawerOrder" value="0" />
+    <boolean name="itsTheBoss" value="true" />
+    <boolean name="rvrTasMode2" value="true" />
+    <boolean name="drwGridIdpdt" value="true" />
+    <boolean name="homeShowEvent" value="true" />
+    <string name="msnFeedTopics">[{&quot;name&quot;:&quot;NEWS&quot;,&quot;position&quot;:0,&quot;isFollowed&quot;:true,&quot;isCustom&quot;:false},{&quot;name&quot;:&quot;SPORTS&quot;,&quot;position&quot;:1,&quot;isFollowed&quot;:true,&quot;isCustom&quot;:false},{&quot;name&quot;:&quot;LIFESTYLE&quot;,&quot;position&quot;:2,&quot;isFollowed&quot;:true,&quot;isCustom&quot;:false},{&quot;name&quot;:&quot;AUTOS&quot;,&quot;position&quot;:3,&quot;isFollowed&quot;:true,&quot;isCustom&quot;:false},{&quot;name&quot;:&quot;HEALTH&quot;,&quot;position&quot;:4,&quot;isFollowed&quot;:true,&quot;isCustom&quot;:false},{&quot;name&quot;:&quot;FOOD &amp; DRINK&quot;,&quot;position&quot;:5,&quot;isFollowed&quot;:true,&quot;isCustom&quot;:false},{&quot;name&quot;:&quot;MONEY&quot;,&quot;position&quot;:6,&quot;isFollowed&quot;:true,&quot;isCustom&quot;:false},{&quot;name&quot;:&quot;TRAVEL&quot;,&quot;position&quot;:7,&quot;isFollowed&quot;:true,&quot;isCustom&quot;:false},{&quot;name&quot;:&quot;VIDEO&quot;,&quot;position&quot;:8,&quot;isFollowed&quot;:true,&quot;isCustom&quot;:false},{&quot;name&quot;:&quot;TechNews&quot;,&quot;position&quot;:9,&quot;isFollowed&quot;:true,&quot;isCustom&quot;:false},{&quot;name&quot;:&quot;Videogames&quot;,&quot;position&quot;:10,&quot;isFollowed&quot;:true,&quot;isCustom&quot;:false}]</string>
+    <boolean name="wallpprPrllx" value="true" />
+    <boolean name="SWAPPABLE_CENTER_PANEL" value="true" />
+    <boolean name="enable_phone_landscape_profile" value="false" />
+    <boolean name="valo" value="true" />
+    <int name="categoryBarPosition" value="1" />
+    <boolean name="indpDrwThm" value="false" />
+    <string name="searchBarHintText">Google Assistant</string>
+    <string name="GlobalTheme">ginlemon.sltheme.lightlines</string>
+    <string name="backupDirectory">content://com.android.externalstorage.documents/tree/primary%3ADocuments%2FSmart%20Launcher%20Backup</string>
+    <boolean name="canAccessAppList" value="true" />
+    <int name="wllPrllxDpns" value="125" />
+    <boolean name="automaticBackup" value="true" />
+    <string name="searchBarBackground">ambient</string>
+    <string name="searchBarTheme">ginlemon.flowerfree</string>
+    <boolean name="widgetPanelOnboardDone" value="true" />
+    <boolean name="lcawtls" value="true" />
+    <string name="weather_last_uv_index">4.6</string>
+    <boolean name="isWallpaperPending" value="false" />
+    <string name="search_engines">[{&quot;type&quot;:&quot;builtin&quot;,&quot;engine&quot;:&quot;Sponsored&quot;},{&quot;type&quot;:&quot;builtin&quot;,&quot;engine&quot;:&quot;Google&quot;,&quot;enabled&quot;:false},{&quot;type&quot;:&quot;builtin&quot;,&quot;engine&quot;:&quot;PlayStore&quot;},{&quot;type&quot;:&quot;builtin&quot;,&quot;engine&quot;:&quot;YouTube&quot;},{&quot;type&quot;:&quot;builtin&quot;,&quot;engine&quot;:&quot;Maps&quot;},{&quot;type&quot;:&quot;builtin&quot;,&quot;engine&quot;:&quot;Yahoo&quot;,&quot;enabled&quot;:false},{&quot;type&quot;:&quot;builtin&quot;,&quot;engine&quot;:&quot;Yandex&quot;,&quot;enabled&quot;:false},{&quot;type&quot;:&quot;builtin&quot;,&quot;engine&quot;:&quot;Baidu&quot;,&quot;enabled&quot;:false},{&quot;type&quot;:&quot;builtin&quot;,&quot;engine&quot;:&quot;DuckDuckGo&quot;,&quot;enabled&quot;:false},{&quot;type&quot;:&quot;builtin&quot;,&quot;engine&quot;:&quot;Bing&quot;,&quot;enabled&quot;:false},{&quot;type&quot;:&quot;builtin&quot;,&quot;engine&quot;:&quot;Startpage&quot;,&quot;enabled&quot;:false},{&quot;type&quot;:&quot;builtin&quot;,&quot;engine&quot;:&quot;Naver&quot;,&quot;enabled&quot;:false},{&quot;type&quot;:&quot;builtin&quot;,&quot;engine&quot;:&quot;GoogleAssistant&quot;,&quot;enabled&quot;:false},{&quot;type&quot;:&quot;builtin&quot;,&quot;engine&quot;:&quot;Qwant&quot;,&quot;enabled&quot;:false},{&quot;type&quot;:&quot;builtin&quot;,&quot;engine&quot;:&quot;Ecosia&quot;,&quot;enabled&quot;:false},{&quot;type&quot;:&quot;builtin&quot;,&quot;engine&quot;:&quot;Sponsored&quot;,&quot;enabled&quot;:false},{&quot;type&quot;:&quot;builtin&quot;,&quot;engine&quot;:&quot;Brave&quot;,&quot;enabled&quot;:false},{&quot;type&quot;:&quot;builtin&quot;,&quot;engine&quot;:&quot;Kagi&quot;,&quot;enabled&quot;:false},{&quot;type&quot;:&quot;builtin&quot;,&quot;engine&quot;:&quot;Perplexity&quot;,&quot;enabled&quot;:false},{&quot;type&quot;:&quot;builtin&quot;,&quot;engine&quot;:&quot;ChatGpt&quot;,&quot;enabled&quot;:false}]</string>
+    <string name="LastLocale">en-US</string>
+    <boolean name="firsttime" value="false" />
+    <int name="DrwLandscapeColumns" value="10" />
+    <boolean name="panelManagerOnboardDone" value="true" />
+    <string name="last_position_time">38.7895687;-77.0707832;fused;1661109684536</string>
+    <boolean name="sp_more_apps" value="true" />
+    <string name="AppColors">{&quot;background&quot;:-852007,&quot;foreground&quot;:-9797568}</string>
+    <string name="lastWallpaperMetadata">{&quot;author&quot;:&quot;Emilio Garcia&quot;,&quot;source&quot;:&quot;Unsplash&quot;,&quot;link&quot;:&quot;https://unsplash.com/photos/a-bridge-spans-over-crystal-clear-water-W51Rp00XOdM&quot;}</string>
+    <int name="randomWallMinutes" value="120" />
+    <boolean name="pref_calendar_show_all_day" value="false" />
+    <string name="SystemFont_name">Default</string>
+    <int name="folderIconBgTheme" value="1" />
+    <boolean name="glApEw2" value="false" />
+    <int name="DrwPortraitColumns" value="4" />
+    <int name="2XvQtcl5gO" value="1" />
+    <string name="launcher_profile_#0">{&quot;id&quot;:0,&quot;defaultHomePage&quot;:0,&quot;gridUserSettings&quot;:{&quot;columns&quot;:6,&quot;rows&quot;:11,&quot;cellWidthDp&quot;:44,&quot;hasLabel&quot;:true,&quot;labelsSizeSp&quot;:12,&quot;rotateOnPlace&quot;:false},&quot;drawerSettings&quot;:{&quot;portraitColumns&quot;:4,&quot;landscapeColumns&quot;:10,&quot;cellWidthDp&quot;:64,&quot;verticalItemSpacingDp&quot;:4,&quot;hasLabel&quot;:true,&quot;labelsSizeSp&quot;:12,&quot;labelLines&quot;:2}}</string>
+    <int name="randomWallId" value="6653" />
+    <set name="pref_calendar_selected">
+        <string>11</string>
+        <string>12</string>
+        <string>13</string>
+        <string>3</string>
+        <string>14</string>
+        <string>17</string>
+        <string>8</string>
+        <string>9</string>
+        <string>10</string>
+    </set>
+    <int name="prevVersion" value="59" />
+    <boolean name="immersiveFolder" value="true" />
+    <boolean name="rmThemeIcons" value="false" />
+    <boolean name="useSLColorExtraction" value="true" />
+    <int name="widgetBlurVibrancy" value="39" />
+    <boolean name="drawerCategorySuggestion" value="false" />
+    <boolean name="is_day" value="true" />
+    <boolean name="useRandomWallpaper" value="true" />
+    <int name="googleNowPanelFlag" value="0" />
+    <int name="widgetBlurRadius" value="125" />
+    <string name="intentCalendarAction">{&#10;  &quot;type&quot;: &quot;serializable&quot;,&#10;  &quot;serializableAction&quot;: {&#10;    &quot;type&quot;: &quot;ginlemon.flower.models.SerializableAction.LaunchAppAction&quot;,&#10;    &quot;packageName&quot;: &quot;com.appgenix.bizcal&quot;,&#10;    &quot;label&quot;: &quot;Business Calendar&quot;,&#10;    &quot;activityName&quot;: &quot;com.appgenix.bizcal.LaunchActivity&quot;,&#10;    &quot;userId&quot;: 0&#10;  }&#10;}</string>
+    <int name="appsAnimation" value="8" />
+    <long name="weather_last_weather_update" value="1783618783372" />
+    <boolean name="black_mode2" value="true" />
+    <string name="widgetTheme">home</string>
+    <long name="installationTime" value="1606507148340" />
+    <boolean name="SearchBarVisible" value="true" />
+    <boolean name="folderWithBg" value="true" />
+    <string name="launcherTheme">liquid_glass</string>
+    <int name="randomWallSeconds" value="7200" />
+    <string name="doubleTapLabel">Show recent apps</string>
+    <int name="gridColumn" value="6" />
+    <boolean name="rvrTasMode" value="false" />
+    <int name="gridRows" value="11" />
+    <int name="cellSize" value="44" />
+    <string name="ClockFontData3">{&quot;type&quot;:&quot;Res&quot;,&quot;resName&quot;:&quot;ginlemon.flowerfree:font/tilde_regular&quot;}</string>
+    <long name="LastTimeSearchBarUsed" value="1765983314493" />
+    <int name="colorAccent" value="-8427280" />
+    <boolean name="hidAppInfo" value="true" />
+    <boolean name="homeLabels" value="true" />
+    <int name="labelSize" value="120" />
+    <int name="failedBoots" value="0" />
+    <boolean name="improveReadability" value="true" />
+    <string name="ClockFontHours3">{&quot;type&quot;:&quot;Res&quot;,&quot;resName&quot;:&quot;ginlemon.flowerfree:font/tilde_light&quot;}</string>
+    <string name="intentClockAction">{&#10;  &quot;type&quot; : &quot;default&quot;,&#10;  &quot;action&quot; : {&#10;    &quot;type&quot; : &quot;ginlemon.flower.library.BasicClickAction.Default&quot;&#10;  }&#10;}</string>
+    <string name="doubleTap">{&quot;type&quot;: &quot;ginlemon.flower.models.SerializableAction.LaunchIntentAction&quot;,&quot;label&quot;: &quot;Show recent apps&quot;,&quot;intent&quot;: &quot;#Intent;package=ginlemon.flowerfree;i.slAction=8;end&quot;}</string>
+    <int name="blurVibrancy" value="39" />
+    <string name="PanelsEngagementData">40,1606511126875,true;50,1606511360200,true;</string>
+    <boolean name="bottomButtons" value="false" />
+    <int name="maxBubbleSize" value="93" />
+    <boolean name="widgetBottomButtons" value="false" />
+    <boolean name="customPadding" value="false" />
+    <boolean name="readMessage2" value="true" />
+    <string name="ClockShadow">8/0/1/#40000000</string>
+    <boolean name="_whatsnewShown" value="true" />
+    <int name="dayOfTheMonth" value="9" />
+    <int name="notificationColor" value="-7448439" />
+    <boolean name="applyFntWdgt" value="true" />
+    <long name="lastBootTime" value="1783545407419" />
+    <int name="FlowerDesign" value="1" />
+    <boolean name="isRestoring" value="true" />
+</map>

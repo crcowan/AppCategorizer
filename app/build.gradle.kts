@@ -4,6 +4,11 @@ plugins {
   alias(libs.plugins.compose.compiler)
   alias(libs.plugins.kotlin.serialization)
   alias(libs.plugins.ksp)
+  alias(libs.plugins.hilt)
+}
+
+base {
+    archivesName.set("AppCategorizer")
 }
 
 android {
@@ -21,6 +26,7 @@ android {
         release {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
     compileOptions {
@@ -96,8 +102,20 @@ dependencies {
   // Play Store Scraping
   implementation(libs.jsoup)
 
-  // On-Device LLM (MediaPipe)
+  // Dependency Injection (Hilt)
+  implementation(libs.hilt.android)
+  ksp(libs.hilt.compiler)
+  implementation(libs.androidx.hilt.navigation.compose)
 
-  // Cloud APIs (OpenAI / Claude / Gemini)
+  // Background Processing (WorkManager)
+  implementation(libs.work.runtime.ktx)
+  implementation(libs.androidx.hilt.work)
+  ksp(libs.androidx.hilt.compiler)
+
+  // Cloud APIs
+  implementation(libs.retrofit)
+  implementation(libs.retrofit.converter.gson)
   implementation(libs.okhttp)
+  implementation(libs.okhttp.logging)
+  implementation(libs.google.ai.client.generativeai)
 }

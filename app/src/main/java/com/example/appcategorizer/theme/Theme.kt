@@ -10,6 +10,8 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
+enum class ThemePref { SYSTEM, LIGHT, DARK }
+
 private val DarkColorScheme = darkColorScheme(primary = Purple80, secondary = PurpleGrey80, tertiary = Pink80)
 
 private val LightColorScheme =
@@ -30,21 +32,28 @@ private val LightColorScheme =
   )
 
 @Composable
-fun AppCategorizerTheme(
-  darkTheme: Boolean = isSystemInDarkTheme(),
-  // Dynamic color is available on Android 12+
-  dynamicColor: Boolean = true,
-  content: @Composable () -> Unit,
-) {
-  val colorScheme =
-    when {
-      dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-        val context = LocalContext.current
-        if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-      }
-      darkTheme -> DarkColorScheme
-      else -> LightColorScheme
-    }
 
-  MaterialTheme(colorScheme = colorScheme, typography = Typography, content = content)
+fun AppCategorizerTheme(
+    themePref: ThemePref = ThemePref.SYSTEM,
+    // Dynamic color is available on Android 12+
+    dynamicColor: Boolean = true,
+    content: @Composable () -> Unit,
+) {
+    val isDark = when (themePref) {
+        ThemePref.DARK -> true
+        ThemePref.LIGHT -> false
+        ThemePref.SYSTEM -> isSystemInDarkTheme()
+    }
+    val colorScheme =
+        when {
+            dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+                val context = LocalContext.current
+                if (isDark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+            }
+            isDark -> DarkColorScheme
+            else -> LightColorScheme
+        }
+
+    MaterialTheme(colorScheme = colorScheme, typography = Typography, content = content)
 }
+

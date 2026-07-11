@@ -7,5 +7,9 @@ data class AppInfo(
     val name: String,
     val icon: Drawable?,
     var playStoreCategory: String? = null,
-    var llmCategory: String? = null
+    var llmCategory: String? = null,
+    var parentCategory: String = "Other",
+    var shortDescription: String? = null,
+    var fullDescription: String? = null,
+    var reviewSnippet: String? = null
 )

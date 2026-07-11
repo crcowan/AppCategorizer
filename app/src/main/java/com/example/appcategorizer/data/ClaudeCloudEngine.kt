@@ -28,7 +28,16 @@ class ClaudeCloudEngine(private val repository: CategoryRepository) : Categoriza
             appListJsonArray.put(JSONObject().apply {
                 put("package", app.packageName)
                 put("name", app.name)
-                put("description", app.playStoreCategory ?: "No description provided")
+                val descText = buildString {
+                    append(app.playStoreCategory ?: "No category")
+                    if (!app.shortDescription.isNullOrBlank()) append(" | ${app.shortDescription}")
+                    if (!app.fullDescription.isNullOrBlank()) {
+                        val full = app.fullDescription!!
+                        append(" | ")
+                        append(if (full.length > 300) full.substring(0, 300) + "..." else full)
+                    }
+                }
+                put("description", descText)
             })
         }
         val appListString = appListJsonArray.toString(2)
@@ -46,8 +55,9 @@ class ClaudeCloudEngine(private val repository: CategoryRepository) : Categoriza
             2. You MUST use ONLY the following exact categories:
 $categoryListString
             3. If an app does not perfectly fit into any category, you MUST select the closest conceptual match. DO NOT omit any apps. Your output array MUST contain exactly ${apps.size} items.
-            4. You MUST output your response as a valid JSON array of objects.
-            5. Each object must have a "package" key (the exact package name) and a "category" key (the assigned category).
+            4. You MUST NOT invent new categories. You MUST NOT use 'Miscellaneous' or 'Misc' unless it is explicitly listed above.
+            5. You MUST output your response as a valid JSON array of objects.
+            6. Each object must have a "package" key (the exact package name) and a "category" key (the assigned category).
             
             Example of EXPECTED JSON output:
             [

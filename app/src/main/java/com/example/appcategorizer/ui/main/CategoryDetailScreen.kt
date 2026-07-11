@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.appcategorizer.data.AppInfo
 import com.example.appcategorizer.data.CategoryTaxonomyEntity
+import com.example.appcategorizer.ui.settings.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -23,6 +24,14 @@ fun CategoryDetailScreen(
     viewModel: MainScreenViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    
+    val settingsViewModel: SettingsViewModel = viewModel()
+    val zoomLevel by settingsViewModel.zoomLevel.collectAsState(initial = "Medium")
+    val scaleFactor = when (zoomLevel) {
+        "Small" -> 0.8f
+        "Large" -> 1.2f
+        else -> 1f
+    }
 
     Scaffold(
         topBar = {
@@ -65,7 +74,7 @@ fun CategoryDetailScreen(
                         }
                     } else {
                         // We can reuse the CategorizedDrawer we built in MainScreen.kt!
-                        CategorizedDrawer(categories = groupedMap)
+                        CategorizedDrawer(categories = groupedMap, scaleFactor = scaleFactor, pinchScale = 1f)
                     }
                 }
                 else -> {

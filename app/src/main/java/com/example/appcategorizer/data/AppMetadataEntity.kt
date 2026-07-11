@@ -8,6 +8,7 @@ data class AppMetadataEntity(
     @PrimaryKey val packageName: String,
     val playStoreCategory: String?,
     val shortDescription: String?,
+    val fullDescription: String?,
     val reviewSnippet: String?,
     val lastUpdated: Long,
     val aiCategory: String? = null

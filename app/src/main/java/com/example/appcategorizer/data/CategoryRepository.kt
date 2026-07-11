@@ -1,12 +1,12 @@
 package com.example.appcategorizer.data
 
-import android.app.Application
+import android.content.Context
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.map
 
-class CategoryRepository(application: Application) {
-    private val database = AppDatabase.getDatabase(application)
+class CategoryRepository(context: Context) {
+    private val database = AppDatabase.getDatabase(context)
     private val appDao = database.appDao()
 
     suspend fun getTaxonomy(): List<CategoryTaxonomyEntity> = withContext(Dispatchers.IO) {
@@ -132,6 +132,24 @@ class CategoryRepository(application: Application) {
 
     suspend fun setClaudeApiKey(key: String) = withContext(Dispatchers.IO) {
         appDao.insertSetting(SettingsEntity("CLAUDE_API_KEY", key))
+    }
+
+    // Theme Preference
+    suspend fun getThemePreference(): String = withContext(Dispatchers.IO) {
+        appDao.getSetting("THEME_PREFERENCE") ?: "System"
+    }
+
+    suspend fun setThemePreference(pref: String) = withContext(Dispatchers.IO) {
+        appDao.insertSetting(SettingsEntity("THEME_PREFERENCE", pref))
+    }
+
+    // Zoom Level Preference
+    suspend fun getZoomLevel(): String = withContext(Dispatchers.IO) {
+        appDao.getSetting("GRID_ZOOM_LEVEL") ?: "Medium"
+    }
+
+    suspend fun setZoomLevel(level: String) = withContext(Dispatchers.IO) {
+        appDao.insertSetting(SettingsEntity("GRID_ZOOM_LEVEL", level))
     }
 
     suspend fun getEnginePreference(): String = withContext(Dispatchers.IO) {

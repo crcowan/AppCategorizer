@@ -27,11 +27,13 @@ fun SettingsScreen(
     onBack: () -> Unit,
     viewModel: SettingsViewModel = viewModel()
 ) {
-    val taxonomy by viewModel.taxonomy.collectAsState()
+    val themePreference by viewModel.themePreference.collectAsState()
+    val zoomLevel by viewModel.zoomLevel.collectAsState()
     val geminiApiKey by viewModel.geminiApiKey.collectAsState()
     val openAIApiKey by viewModel.openAIApiKey.collectAsState()
     val claudeApiKey by viewModel.claudeApiKey.collectAsState()
     val enginePreference by viewModel.enginePreference.collectAsState()
+    val taxonomy by viewModel.taxonomy.collectAsState(initial = emptyList())
 
     var showDialog by remember { mutableStateOf(false) }
     var editingCategory by remember { mutableStateOf<com.example.appcategorizer.data.CategoryTaxonomyEntity?>(null) }
@@ -123,13 +125,67 @@ fun SettingsScreen(
                 modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 8.dp)
             )
 
-            // Engine Preference Dropdown
-            var expanded by remember { mutableStateOf(false) }
-            val options = listOf("Gemini", "OpenAI", "Claude")
+            // Theme Preference Dropdown
+            var themeExpanded by remember { mutableStateOf(false) }
+            val themeOptions = listOf("System", "Light", "Dark")
+            ExposedDropdownMenuBox(
+                expanded = themeExpanded,
+                onExpandedChange = { themeExpanded = it },
+                modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth()
+            ) {
+                OutlinedTextField(
+                    modifier = Modifier.menuAnchor().fillMaxWidth(),
+                    readOnly = true,
+                    value = themePreference,
+                    onValueChange = {},
+                    label = { Text("Theme") },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = themeExpanded) },
+                    colors = ExposedDropdownMenuDefaults.textFieldColors()
+                )
+                ExposedDropdownMenu(expanded = themeExpanded, onDismissRequest = { themeExpanded = false }) {
+                    themeOptions.forEach { opt ->
+                        DropdownMenuItem(text = { Text(opt) }, onClick = {
+                            viewModel.setThemePreference(opt)
+                            themeExpanded = false
+                        })
+                    }
+                }
+            }
+
+            // Zoom Level Dropdown
+            var zoomExpanded by remember { mutableStateOf(false) }
+            val zoomOptions = listOf("Small", "Medium", "Large")
+            ExposedDropdownMenuBox(
+                expanded = zoomExpanded,
+                onExpandedChange = { zoomExpanded = it },
+                modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth()
+            ) {
+                OutlinedTextField(
+                    modifier = Modifier.menuAnchor().fillMaxWidth(),
+                    readOnly = true,
+                    value = zoomLevel,
+                    onValueChange = {},
+                    label = { Text("Zoom Level") },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = zoomExpanded) },
+                    colors = ExposedDropdownMenuDefaults.textFieldColors()
+                )
+                ExposedDropdownMenu(expanded = zoomExpanded, onDismissRequest = { zoomExpanded = false }) {
+                    zoomOptions.forEach { opt ->
+                        DropdownMenuItem(text = { Text(opt) }, onClick = {
+                            viewModel.setZoomLevel(opt)
+                            zoomExpanded = false
+                        })
+                    }
+                }
+            }
+            
+            // Cloud provider dropdown state variables
+            var engineExpanded by remember { mutableStateOf(false) }
+            val engineOptions = listOf("Gemini", "OpenAI", "Claude")
             
             ExposedDropdownMenuBox(
-                expanded = expanded,
-                onExpandedChange = { expanded = it },
+                expanded = engineExpanded,
+                onExpandedChange = { engineExpanded = it },
                 modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth()
             ) {
                 OutlinedTextField(
@@ -138,19 +194,19 @@ fun SettingsScreen(
                     value = enginePreference,
                     onValueChange = { },
                     label = { Text("Cloud Provider") },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = engineExpanded) },
                     colors = ExposedDropdownMenuDefaults.textFieldColors()
                 )
                 ExposedDropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false }
+                    expanded = engineExpanded,
+                    onDismissRequest = { engineExpanded = false }
                 ) {
-                    options.forEach { selectionOption ->
+                    engineOptions.forEach { selectionOption ->
                         DropdownMenuItem(
                             text = { Text(selectionOption) },
                             onClick = {
                                 viewModel.setEnginePreference(selectionOption)
-                                expanded = false
+                                engineExpanded = false
                             }
                         )
                     }
@@ -182,6 +238,24 @@ fun SettingsScreen(
                     visualTransformation = PasswordVisualTransformation(),
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
                 )
+            }
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+            
+            // App Management Section
+            Text(
+                "App Management",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 8.dp)
+            )
+            Button(
+                onClick = { viewModel.forceRecategorize() },
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+            ) {
+                Icon(Icons.Default.Edit, contentDescription = "Recategorize All", modifier = Modifier.padding(end = 8.dp))
+                Text("Force Recategorize All Apps")
             }
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
