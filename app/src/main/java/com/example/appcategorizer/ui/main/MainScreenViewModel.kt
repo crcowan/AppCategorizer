@@ -18,10 +18,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class MainScreenViewModel @Inject constructor(
     private val getGroupedAppsUseCase: GetGroupedAppsUseCase,
@@ -43,9 +46,6 @@ class MainScreenViewModel @Inject constructor(
         viewModelScope.launch {
             categoryRepo.isGroupingEnabledFlow().collect { enabled ->
                 _isGroupingEnabled.value = enabled
-                if (_uiState.value is MainScreenUiState.Success) {
-                    loadApps() // Re-fetch from use case to get updated grouping
-                }
             }
         }
         
@@ -59,9 +59,6 @@ class MainScreenViewModel @Inject constructor(
                             val progress = workInfo.progress.getString(CategorizationWorker.PROGRESS_KEY) ?: "Categorizing..."
                             _uiState.value = MainScreenUiState.Loading(progress)
                         }
-                        WorkInfo.State.SUCCEEDED -> {
-                            loadApps()
-                        }
                         WorkInfo.State.FAILED -> {
                             val error = workInfo.outputData.getString(CategorizationWorker.ERROR_KEY) ?: "Categorization failed"
                             _uiState.value = MainScreenUiState.Error(Exception(error))
@@ -71,7 +68,21 @@ class MainScreenViewModel @Inject constructor(
                 }
             }
 
-        loadApps()
+        viewModelScope.launch {
+            _isGroupingEnabled.flatMapLatest { enabled ->
+                _uiState.value = MainScreenUiState.Loading("Discovering apps...")
+                getGroupedAppsUseCase(enabled)
+            }.collect { apps ->
+                val taxonomy = categoryRepo.getTaxonomy()
+                val uncategorized = apps.filter { it.llmCategory == null }
+                if (uncategorized.isNotEmpty()) {
+                    val workRequest = OneTimeWorkRequestBuilder<CategorizationWorker>().build()
+                    workManager.enqueueUniqueWork("CategorizationWork", androidx.work.ExistingWorkPolicy.KEEP, workRequest)
+                } else {
+                    _uiState.value = MainScreenUiState.Success(apps, taxonomy)
+                }
+            }
+        }
     }
 
     fun updateSearchQuery(query: String) {
@@ -93,23 +104,7 @@ class MainScreenViewModel @Inject constructor(
     }
 
     fun loadApps() {
-        viewModelScope.launch {
-            try {
-                _uiState.value = MainScreenUiState.Loading("Discovering apps...")
-                val apps = getGroupedAppsUseCase(_isGroupingEnabled.value)
-                val taxonomy = categoryRepo.getTaxonomy()
-                
-                val uncategorized = apps.filter { it.llmCategory == null }
-                if (uncategorized.isNotEmpty()) {
-                    val workRequest = OneTimeWorkRequestBuilder<CategorizationWorker>().build()
-                    workManager.enqueueUniqueWork("CategorizationWork", androidx.work.ExistingWorkPolicy.KEEP, workRequest)
-                } else {
-                    _uiState.value = MainScreenUiState.Success(apps, taxonomy)
-                }
-            } catch (e: Exception) {
-                _uiState.value = MainScreenUiState.Error(e)
-            }
-        }
+        // Now handled automatically via flow collection in init block.
     }
 
     fun getSearchResults(query: String, apps: List<AppInfo>): List<SearchResult> {
